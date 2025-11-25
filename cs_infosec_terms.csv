@@ -1,0 +1,21 @@
+﻿용어,빈도,설명,카테고리
+보안,35,컴퓨터 시스템과 정보를 비인가 접근이나 손상으로부터 보호하는 것,Computer Science & Information Security
+알고리즘,19,문제 해결을 위해 컴퓨터가 수행할 일련의 단계적 절차,Computer Science & Information Security
+해킹,16,컴퓨터 시스템에 비인가 접근을 시도하는 행위,Computer Science & Information Security
+취약점,11,보안 시스템의 약점으로 악용될 수 있는 부분,Computer Science & Information Security
+프로그래밍,10,컴퓨터에게 특정 작업을 수행하도록 지시하는 명령어들을 작성하는 과정,Computer Science & Information Security
+암호,9,정보를 비밀로 유지하기 위해 사용되는 코드화된 메시지,Computer Science & Information Security
+웹,9,인터넷을 통해 정보를 공유하는 시스템,Computer Science & Information Security
+서버,4,다른 컴퓨터(클라이언트)에 서비스를 제공하는 컴퓨터,Computer Science & Information Security
+네트워크,3,컴퓨터들을 상호연결하여 정보를 교환하는 시스템,Computer Science & Information Security
+인증,3,사용자의 신원을 확인하는 프로세스,Computer Science & Information Security
+데이터베이스,2,체계적으로 정리하고 관리되는 데이터의 집합,Computer Science & Information Security
+메모리,2,컴퓨터가 데이터와 명령어를 임시로 저장하는 장치,Computer Science & Information Security
+스크립트,2,간단한 자동화 작업을 수행하는 코드,Computer Science & Information Security
+방화벽,1,승인되지 않은 네트워크 접근을 차단하는 보안 시스템,Computer Science & Information Security
+운영체제,1,컴퓨터의 하드웨어 자원을 관리하고 소프트웨어가 실행되도록 하는 시스템 소프트웨어,Computer Science & Information Security
+프로세스,1,실행 중인 프로그램의 인스턴스,Computer Science & Information Security
+API,1,소프트웨어가 서로 통신하는 방식을 정의하는 인터페이스,Computer Science & Information Security
+버그,1,프로그램의 오류나 결함,Computer Science & Information Security
+디버깅,1,프로그램의 버그를 찾아 수정하는 과정,Computer Science & Information Security
+배포,1,완성된 소프트웨어를 사용자에게 제공하는 과정,Computer Science & Information Security
