@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ class_id }}반 채팅방</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <h2>{{ class_id }}반 채팅 및 출석</h2>
+            <form action="/logout" method="get">
+                <button type="submit">로그아웃</button>
+            </form>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button" onclick="switchTab('chat-tab')">채팅</button>
+            <button class="tab-button" onclick="switchTab('notice-tab')">공지사항</button>
+        </div>
+
+        <div id="chat-tab" class="tab-content">
+            <div class="chat-box" id="chat"></div>
+            <form id="chat-form">
+                <input type="text" id="message" placeholder="메시지를 입력하세요..." autocomplete="off" required>
+                <button type="submit">전송</button>
+            </form>
+            <form id="chat-upload-form">
+                <input type="file" id="chat-file" required>
+                <button type="submit">파일 업로드</button>
+            </form>
+        </div>
+
+        <div id="notice-tab" class="tab-content" style="display: none;">
+            <h4>공지사항</h4>
+            <div id="notice-box"></div>
+            <form id="notice-form">
+                <input type="text" id="notice-message" placeholder="공지 작성 (교사, 반장, 부반장만)" required>
+                <button type="submit">등록</button>
+            </form>
+            <form id="notice-upload-form">
+                <input type="file" id="notice-file" required>
+                <button type="submit">공지 파일 업로드</button>
+            </form>
+        </div>
+
+        <button id="attend-btn">출석하기</button>
+        <div id="attend-list"></div>
+    </div>
+
+<script>
+    const socket = io();
+    const room = "class{{ class_id }}";
+    socket.emit('join', { room });
+
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('message');
+    const chat = document.getElementById('chat');
+
+    socket.on('message', msg => {
+        const p = document.createElement('p');
+        p.innerHTML = msg;
+        chat.appendChild(p);
+        chat.scrollTop = chat.scrollHeight;
+    });
+
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+        if (input.value.trim()) {
+            socket.emit('message', { room, message: input.value });
+            input.value = '';
+        }
+    });
+
+    document.getElementById('attend-btn').onclick = () => {
+        fetch(`/attendance/{{ class_id }}`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => alert('출석 완료!'));
+    };
+
+    fetch(`/attendance/{{ class_id }}`)
+        .then(res => res.json())
+        .then(data => {
+            const list = document.getElementById('attend-list');
+            list.innerHTML = '<h4>출석자</h4>' + data.map(id => `<div>${id}</div>`).join('');
+        });
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(div => div.style.display = 'none');
+        document.getElementById(tabId).style.display = 'block';
+    }
+
+    function loadNotices() {
+        fetch(`/notice/{{ class_id }}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('notice-box').innerHTML = data.map(n => {
+                    if (n.match(/\.(jpg|png|jpeg|gif)$/i)) {
+                        return `<p><img src="/uploads/{{ class_id }}/${n}" width="200"></p>`;
+                    } else if (n.match(/\.[a-z0-9]+$/i)) {
+                        return `<p><a href="/uploads/{{ class_id }}/${n}" target="_blank">${n}</a></p>`;
+                    } else {
+                        return `<p>${n}</p>`;
+                    }
+                }).join('');
+            });
+    }
+
+    loadNotices();
+
+    document.getElementById('notice-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const msg = document.getElementById('notice-message').value.trim();
+        if (msg) {
+            fetch(`/notice/{{ class_id }}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg })
+            }).then(() => {
+                document.getElementById('notice-message').value = '';
+                loadNotices();
+            });
+        }
+    });
+
+    document.getElementById('notice-upload-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const fileInput = document.getElementById('notice-file');
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+        fetch(`/upload/{{ class_id }}`, {
+            method: 'POST',
+            body: formData
+        }).then(res => res.json()).then(data => {
+            if (data.status === 'ok') {
+                fetch(`/notice/{{ class_id }}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: data.filename })
+                }).then(loadNotices);
+            } else if (data.status === 'wait') {
+                alert("30초 후 다시 업로드할 수 있습니다.");
+            }
+        });
+    });
+
+    document.getElementById('chat-upload-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const fileInput = document.getElementById('chat-file');
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+        fetch(`/upload/{{ class_id }}`, {
+            method: 'POST',
+            body: formData
+        }).then(res => res.json()).then(data => {
+            if (data.status === 'ok') {
+                const link = `/uploads/{{ class_id }}/${data.filename}`;
+                const isImg = data.filename.match(/\.(jpg|jpeg|png|gif)$/i);
+                const content = isImg ? `<img src="${link}" width="200">` : `<a href="${link}" target="_blank">${data.filename}</a>`;
+                socket.emit('message', { room, message: content });
+            } else if (data.status === 'wait') {
+                alert("30초 후 다시 업로드할 수 있습니다.");
+            }
+        });
+    });
+</script>
+</body>
+</html>
